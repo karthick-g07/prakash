@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel File Merger</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/gg.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        .sidebar {
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: #111;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 60px;
+            z-index: 2;
+        }
+        .sidebar a {
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+            transition: 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+        .open-btn {
+            font-size: 20px;
+            cursor: pointer;
+            color: white;
+            background-color: #111;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            top: 20px;
+            width: 40px;
+            height: 40px;
+            left: 20px;
+            z-index: 3;
+        }
+        .content {
+            margin-left: 0;
+            padding: 20px;
+            transition: margin-left 0.3s;
+            flex-grow: 1;
+            width: 100%;
+            overflow: hidden;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const content = document.querySelector('.content');
+
+            document.querySelector('.open-btn').addEventListener('click', function () {
+                sidebar.style.width = sidebar.style.width === '250px' ? '0' : '250px';
+                content.style.marginLeft = sidebar.style.width;
+            });
+
+            document.getElementById('report-button').addEventListener('click', function (e) {
+    e.preventDefault(); // Prevent default button behavior
+    callGenerateReport(); // Call the function to generate the report
+});
+
+function callGenerateReport() {
+    alert('callGenerateReport function is called'); // Show an alert when the function is invoked
+
+    fetch(`api/generate-report`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        alert('Report generation initiated successfully');
+    })
+    .catch(error => console.error('Error generating report:', error));
+}
+
+            document.getElementById('upload-data-link').addEventListener('click', function (e) {
+                e.preventDefault();
+                content.innerHTML = `
+                    <h1>Excel File Merger</h1>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <label for="department">Department:</label>
+                        <select id="department" name="department" required>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="EEE">EEE</option>
+                            <option value="MECH">MECH</option>
+                            <option value="CIVIL">CIVIL</option>
+                        </select>
+
+                        <label for="year">Year:</label>
+                        <select id="year" name="year" required>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                        </select>
+
+                        <label for="study_year">Study Year:</label>
+                        <select id="study_year" name="study_year" required>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                        </select>
+
+                        <label for="semester">Semester:</label>
+                        <select id="SEMESTER" name="SEMESTER" required>
+                            <option value="ODD">ODD</option>
+                            <option value="EVEN">EVEN</option>
+                        </select>
+
+                        <label for="section">Section:</label>
+                        <select id="section" name="section" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                        </select>
+
+                        <div class="drop-zone">
+                            <p>Drag and drop Excel File here or click to upload</p>
+                            <input type="file" id="excel_file1" name="excel_file1" required>
+                        </div>
+                        <div class="drop-zone">
+                            <p>Drag and drop Excel File here or click to upload</p>
+                            <input type="file" id="excel_file2" name="excel_file2" required>
+                        </div>
+                        <div class="drop-zone">
+                            <p>Drag and drop Excel File here or click to upload</p>
+                            <input type="file" id="excel_file3" name="excel_file3" required>
+                        </div>
+                        <div class="drop-zone">
+                            <p>Drag and drop Excel File here or click to upload</p>
+                            <input type="file" id="excel_file4" name="excel_file4" required>
+                        </div>
+
+                        <button type="submit">Merge and Extract Data</button>
+                    </form>
+                `;
+                sidebar.style.width = '0'; /* Close the sidebar */
+                content.style.marginLeft = '0'; /* Reset margin */
+            });
+        });
+    </script>
+</head>
+<body>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+    <div id="sidebar" class="sidebar">
+        <button class="open-btn">☰</button>
+        <a href="#" id="report-button">Report</a>
+        <a href="#" id="upload-data-link">Upload Data</a>
+    </div>
+
+    <div class="content">
+        <h1>Excel File Merger</h1>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="department">Department:</label>
+            <select id="department" name="department" required>
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="MECH">MECH</option>
+                <option value="CIVIL">CIVIL</option>
+            </select>
+
+            <label for="year">Year:</label>
+            <select id="year" name="year" required>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+            </select>
+
+            <label for="study_year">Study Year:</label>
+            <select id="study_year" name="study_year" required>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+            </select>
+            <label for="semester">Semester:</label>
+            <select id="SEMESTER" name="SEMESTER" required>
+                <option value="ODD">ODD</option>
+                <option value="EVEN">EVEN</option>
+            </select>
+            <label for="section">Section:</label>
+            <select id="section" name="section" required>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+            </select>
+
+            <div class="drop-zone">
+                <p>Drag and drop Excel File here or click to upload</p>
+                <input type="file" id="excel_file1" name="excel_file1" required>
+            </div>
+            <div class="drop-zone">
+                <p>Drag and drop Excel File here or click to upload</p>
+                <input type="file" id="excel_file2" name="excel_file2" required>
+            </div>
+            <div class="drop-zone">
+                <p>Drag and drop Excel File here or click to upload</p>
+                <input type="file" id="excel_file3" name="excel_file3" required>
+            </div>
+            <div class="drop-zone">
+                <p>Drag and drop Excel File here or click to upload</p>
+                <input type="file" id="excel_file4" name="excel_file4" required>
+            </div>
+
+            <button type="submit">Merge and Extract Data</button>
+        </form>
+    </div>
+</body>
+</html>
